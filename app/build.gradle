@@ -12,26 +12,59 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.fengpy.myapp"
-        minSdkVersion 14
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk{
+            abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a','x86', 'x86_64'
+        }
+
+        /*manifestPlaceholders = [
+                JPUSH_PKGNAME : applicationId,
+                JPUSH_APPKEY : "f0ca30d3d550c20ec43098fa", //JPush上注册的包名对应的appkey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]*/
+
+        /*multiDexEnabled true*/
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.zt.maven.widget:refreshview:1.0.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.alibaba:fastjson:1.2.37'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'org.litepal.android:core:1.6.0'
+
+    compile files('libs/poi-3.16-beta2.jar')
+    /*compile 'cn.jiguang.sdk:jpush:3.0.8'
+    // 此处以JPush 3.0.9 版本为例。
+    compile 'cn.jiguang.sdk:jcore:1.1.6'
+    // 此处以JCore 1.1.7 版本为例。*/
     testCompile 'junit:junit:4.12'
+    /*compile ('cn.jiguang.sdk:jcore:1.1.6') {
+        exclude module: 'support-v4'
+        exclude group: 'com.android.support'
+    }
+    compile ('cn.jiguang.sdk:jpush:3.0.8') {
+        exclude module: 'support-v4'
+        exclude group: 'com.android.support'
+    }*/
+//    compile 'com.android.support:multidex:1.0.1'
 }

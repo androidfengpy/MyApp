@@ -11,13 +11,13 @@ import java.io.Serializable;
 
 public class DataInfo implements Serializable {
 
+
     private String le;
     private String time;
     private String lat;
     private String lng;
 
     public DataInfo() {
-
     }
 
     public DataInfo(String le, String time, String lat, String lng) {

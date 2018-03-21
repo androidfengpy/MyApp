@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_save_data"
+        android:text="保存数据"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/et_content1"
+        android:hint="输入要保存的内容(字符类型)"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/et_content2"
+        android:hint="输入要保存的内容(数值类型)"
+        android:layout_width="match_parent"
+        android:inputType="number"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btn_restore_data"
+        android:text="恢复数据"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tv_display_data"
+        android:hint="显示保存的数据"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

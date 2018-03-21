@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/DataStorage/DataStorage.iml" filepath="$PROJECT_DIR$/DataStorage/DataStorage.iml" />
       <module fileurl="file://$PROJECT_DIR$/MyApp.iml" filepath="$PROJECT_DIR$/MyApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/litepaldemo/litepaldemo.iml" filepath="$PROJECT_DIR$/litepaldemo/litepaldemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mvpdemo/mvpdemo.iml" filepath="$PROJECT_DIR$/mvpdemo/mvpdemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/uavosdemo/uavosdemo.iml" filepath="$PROJECT_DIR$/uavosdemo/uavosdemo.iml" />
     </modules>
   </component>
 </project>

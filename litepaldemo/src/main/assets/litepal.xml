@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+
+    <dbname value="litepaldemo"></dbname>
+    <version value="4"></version>
+
+    <list>
+        <mapping class="com.stt.litepaldemo.bean.Book"></mapping>
+        <mapping class="com.stt.litepaldemo.bean.Category"></mapping>
+    </list>
+
+</litepal>

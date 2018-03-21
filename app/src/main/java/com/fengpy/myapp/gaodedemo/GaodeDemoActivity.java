@@ -16,13 +16,20 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.HeatmapTileProvider;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
+import com.amap.api.maps.model.TileOverlay;
+import com.amap.api.maps.model.TileOverlayOptions;
+import com.amap.api.maps.model.WeightedLatLng;
 import com.fengpy.myapp.R;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -43,7 +50,7 @@ public class GaodeDemoActivity extends AppCompatActivity {
     private Polyline mPolyline;
     private Button mBtnStart;
     private String color;
-    int data = 10;
+    private int data = 10;
 
     public ConfigManager configManager;
     private  List<BandSetting> bandSettings;
@@ -52,50 +59,72 @@ public class GaodeDemoActivity extends AppCompatActivity {
     // 监测值对应图例色值列表
     private HashMap<String, List<Integer>> colorValues = new HashMap<String, List<Integer>>();
 
+    private PreviewHandler mHandler = new PreviewHandler(this);
 
-    private Handler mHandler = new Handler() {
+    private class PreviewHandler extends Handler {
+        private WeakReference<GaodeDemoActivity> reference;
+
+        public PreviewHandler(GaodeDemoActivity activity) {
+            reference = new WeakReference<>(activity);
+        }
+
         @Override
         public void handleMessage(Message msg) {
-            Bundle b = msg.getData();
-            DataInfo dataInfo = (DataInfo) b.get("data_info");
-            double lat = Double.valueOf(dataInfo.getLat());
-            double lng = Double.valueOf(dataInfo.getLng());
-            LatLng point = new LatLng(lat, lng);
-            Double le = Double.valueOf(dataInfo.getLe());
-            List<Integer> colorValue;
-            try{
-                BandSetting bandSetting = ConfigManager.getInstance(GaodeDemoActivity.this).getBandSetting("le");
-               /* if(colorValues.containsKey("le")) {
-                    colorValue = colorValues.get("le");
-                } else {
-                    colorValue = new ArrayList<Integer>();
-                    colorValues.put("le", colorValue);
-                }*/
+            switch (msg.what) {
+                case 0:
+                    Bundle b = msg.getData();
+                    DataInfo dataInfo = (DataInfo) b.get("data_info");
+                    double lat = Double.valueOf(dataInfo.getLat());
+                    double lng = Double.valueOf(dataInfo.getLng());
+                    LatLng point = new LatLng(lat, lng);
+                    Double le = Double.valueOf(dataInfo.getLe());
+                    List<Integer> colorValue;
+                    try{
+                        BandSetting bandSetting = ConfigManager.getInstance(GaodeDemoActivity.this).getBandSetting("le");
+                       /* if(colorValues.containsKey("le")) {
+                            colorValue = colorValues.get("le");
+                        } else {
+                            colorValue = new ArrayList<Integer>();
+                            colorValues.put("le", colorValue);
+                        }*/
 
-                if(bandSetting != null) {
-                    List<BandRangeSetting> rangs = bandSetting.getRange();
-                    for (int i = 0; i <rangs.size(); i++){
-                        BandRangeSetting range = rangs.get(i);
-                        if(range.getMin() <= le && le < range.getMax()) {
-                            color = range.getColor();
+                        if(bandSetting != null) {
+                            List<BandRangeSetting> rangs = bandSetting.getRange();
+                            for (int i = 0; i <rangs.size(); i++){
+                                BandRangeSetting range = rangs.get(i);
+                                if(range.getMin() <= le && le < range.getMax()) {
+                                    color = range.getColor();
                             /*String c = range.getColor().replace("#", "");
                             if (c.length() < 8) c ="#" + "FF" + c;
                             color = Long.parseLong(c, 16) + "";*/
 //                            colorValue.add(color.intValue());
 //                            break;
+                                }
+                            }
                         }
+                    } catch(Exception e){
+                        e.printStackTrace();
+                        return;
                     }
-                }
-            } catch(Exception e){
-                e.printStackTrace();
-                return;
-            }
 
-            redrawpoint(point, color);
-            mPolyoptions.add(point);
-            redrawline();
+                    redrawpoint(point, color);
+                    mPolyoptions.add(point);
+                    redrawline();
+                    break;
+
+                case 1://TODO=====演示实时添加数据，绘制热力图
+                    WeightedLatLng weightedLatLng = (WeightedLatLng)msg.obj;
+
+                    hotMapDatas.add(weightedLatLng);
+                    createHeatMap3(hotMapDatas);
+
+//                    createHeatMap4(weightedLatLng);
+                    break;
+            }
         }
-    };
+    }
+
+    private List<WeightedLatLng> hotMapDatas = new ArrayList<WeightedLatLng>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,13 +144,201 @@ public class GaodeDemoActivity extends AppCompatActivity {
         mBtnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                initData();
+//                initData();
+
+                initHotData3();//生成热力图数据
             }
         });
 
+//        displayHotmap();
+
+    }
+
+    /**
+     * 展示热力图
+     */
+    private void displayHotmap() {
+        //第一种：只有经纬度的热力图数据
+        /*LatLng[] latlngs = initHotData1();
+        createHeatMap1(latlngs);*/
+
+        //第二种：添加了权值的热力图
+        /*WeightedLatLng[] latlngs = initHotData2();
+        createHeatMap2(latlngs);*/
     }
 
 
+    /**
+     * 1 生成热力图数据: 经纬度
+     */
+    private LatLng[] initHotData1() {
+        LatLng[] latlngs = new LatLng[500];
+        double x = 39.904979;
+        double y = 116.40964;
+
+        for (int i = 0; i < 500; i++) {
+            double _x = 0;
+            double _y = 0;
+            _x = Math.random() * 0.5 - 0.25;
+            _y = Math.random() * 0.5 - 0.25;
+
+            latlngs[i] = new LatLng(x + _x, y + _y);
+        }
+
+        return latlngs;
+    }
+
+    /**
+     * 2 绘制热力图
+     * @param latlngs
+     */
+    private void createHeatMap1(LatLng[] latlngs) {
+        //2 构建热力图
+        HeatmapTileProvider.Builder builder = new HeatmapTileProvider.Builder();
+        builder.data(Arrays.asList(latlngs));//设置热力图绘制的数据
+//        .gradient(ALT_HEATMAP_GRADIENT);
+        //构造热力图对象
+        HeatmapTileProvider heatmapTileProvider = builder.build();
+
+        // 3绘制热力图图层
+        // 初始化 TileOverlayOptions
+        TileOverlayOptions tileOverlayOptions = new TileOverlayOptions();
+        tileOverlayOptions.tileProvider(heatmapTileProvider); // 设置瓦片图层的提供者
+        // 向地图上添加 TileOverlayOptions 类对象
+        mAMap.addTileOverlay(tileOverlayOptions);
+    }
+
+    /**
+     * 第二种添加权值的热力图数据： 生成热力图数据: 经纬度+权值
+     */
+    private WeightedLatLng[] initHotData2() {
+
+        WeightedLatLng[] weightedLatlngs = new WeightedLatLng[500];
+        double x = 39.904979;
+        double y = 116.40964;
+        double val = 20.00;
+
+        for (int i = 0; i < 500; i++) {
+            double _x = 0;
+            double _y = 0;
+            double _val = 0;
+
+            _x = Math.random() * 0.5 - 0.25;
+            _y = Math.random() * 0.5 - 0.25;
+            _val = Math.random() * 10;
+
+            LatLng latlng = new LatLng(x + _x, y + _y);
+
+            weightedLatlngs[i] = new WeightedLatLng(latlng, val + _val);
+
+        }
+
+        return weightedLatlngs;
+    }
+
+    /**
+     * 2 绘制热力图
+     * @param latlngs
+     */
+    private void createHeatMap2(WeightedLatLng[] latlngs) {
+        //2 构建热力图
+        HeatmapTileProvider.Builder builder = new HeatmapTileProvider.Builder();
+        builder.weightedData(Arrays.asList(latlngs));
+//        .gradient(ALT_HEATMAP_GRADIENT);
+        //构造热力图对象
+        HeatmapTileProvider heatmapTileProvider = builder.build();
+
+        // 3绘制热力图图层
+        // 初始化 TileOverlayOptions
+        TileOverlayOptions tileOverlayOptions = new TileOverlayOptions();
+        tileOverlayOptions.tileProvider(heatmapTileProvider); // 设置瓦片图层的提供者
+        // 向地图上添加 TileOverlayOptions 类对象
+        mAMap.addTileOverlay(tileOverlayOptions);
+    }
+
+    private void initHotData3(){
+
+        Message msg = new Message();
+        msg.what = 1;
+
+        double x = 39.904979;
+        double y = 116.40964;
+        double val = 20.00;
+
+        double _x = 0;
+        double _y = 0;
+        double _val = 0;
+
+        _x = Math.random() * 0.5 - 0.25;
+        _y = Math.random() * 0.5 - 0.25;
+        _val = Math.random() * 10;
+
+        LatLng latlng = new LatLng(x + _x, y + _y);
+
+        WeightedLatLng hotData3 = new WeightedLatLng(latlng, val + _val);
+
+       /* Bundle b = new Bundle();
+        b.putSerializable();
+        msg.setData(b);*/
+
+        msg.obj = hotData3;
+        mHandler.sendMessage(msg);
+    }
+
+    private List<TileOverlay> _o = new ArrayList<TileOverlay>();
+    /**
+     * 3 ArrayList 绘制热力图
+     * @param hotMapDatas
+     */
+    private void createHeatMap3(List<WeightedLatLng> hotMapDatas) {
+        //TODO====直接这样的会重复绘制，绘制前需要清除之前绘制在地图上的热力图点
+        //mAMap.clear();
+        //2 构建热力图
+        HeatmapTileProvider.Builder builder = new HeatmapTileProvider.Builder();
+        builder.weightedData(hotMapDatas);
+//        .gradient(ALT_HEATMAP_GRADIENT);
+        //构造热力图对象
+        HeatmapTileProvider heatmapTileProvider = builder.build();
+
+        // 3绘制热力图图层
+        // 初始化 TileOverlayOptions
+        TileOverlayOptions tileOverlayOptions = new TileOverlayOptions();
+        tileOverlayOptions.tileProvider(heatmapTileProvider); // 设置瓦片图层的提供者
+        // 向地图上添加 TileOverlayOptions 类对象
+        TileOverlay o = mAMap.addTileOverlay(tileOverlayOptions);
+        int size = _o.size();
+        if(size > 1){//TODO=====size > 2当保留三层绘制图层的时候删除的闪现效果不是很明显
+            TileOverlay to = _o.get(0);
+            to.remove();
+            _o.remove(0);
+        }
+        _o.add(o);
+    }
+
+    /**
+     * 3 ArrayList 绘制热力图
+     * @param hotMapDatas
+     */
+    private void createHeatMap4(WeightedLatLng hotMapDatas) {
+        //TODO======这样每次单个绘制，所有的热力点在地图缩放的时候不会自动聚合
+        //2 构建热力图
+        HeatmapTileProvider.Builder builder = new HeatmapTileProvider.Builder();
+        builder.weightedData(Arrays.asList(hotMapDatas));
+//        .gradient(ALT_HEATMAP_GRADIENT);
+        //构造热力图对象
+        HeatmapTileProvider heatmapTileProvider = builder.build();
+
+        // 3绘制热力图图层
+        // 初始化 TileOverlayOptions
+        TileOverlayOptions tileOverlayOptions = new TileOverlayOptions();
+        tileOverlayOptions.tileProvider(heatmapTileProvider); // 设置瓦片图层的提供者
+        // 向地图上添加 TileOverlayOptions 类对象
+        mAMap.addTileOverlay(tileOverlayOptions);
+    }
+
+    /**
+     * 根据实时生成的数据绘制路线
+     */
     private void initData() {
         double lat = 39.965;
         double lng = 116.644;
@@ -136,12 +353,15 @@ public class GaodeDemoActivity extends AppCompatActivity {
         data += 5;
         DataInfo dataInfo = new DataInfo(data +"", "20170829", lat+"", lng+"");
         Message msg = new Message();
+        msg.what = 0;
         Bundle b = new Bundle();
         b.putSerializable("data_info", dataInfo);
+
         msg.setData(b);
         mHandler.sendMessage(msg);
-
     }
+
+
 
     private void redrawpoint(LatLng point, String colorValue) {
         BitmapDescriptor bd = getBitmapDes(30, colorValue);

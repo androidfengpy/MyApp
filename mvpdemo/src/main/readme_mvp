@@ -1,0 +1,12 @@
+为什么要做架构设计？
+为了系统更好扩展。
+
+三层
+MVC: Model  View Controller
+MVP: Model View Presenter
+
+Model:业务逻辑和实体模型
+View:视图，对应我们之前的activity，负责View的绘制以及与用户交互
+Presenter：中间者，负责完成View与Model间的交互（绑定Model和View）
+
+OCP开闭原则：对修改关闭，对扩展开放

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_crete_db"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="创建数据库" />
+
+    <Button
+        android:id="@+id/btn_insert_book"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="向Book表中添加数据" />
+
+    <Button
+        android:id="@+id/btn_update_book"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="更新Book表中数据" />
+
+    <Button
+        android:id="@+id/btn_delete_book"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="删除Book表中数据" />
+
+    <Button
+        android:id="@+id/btn_query_book"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="查询Book表中数据" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_new_tab_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="新建表名" />
+
+        <Button
+            android:id="@+id/btn_create_new_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="创建新表" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="显示查询的数据"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/tv_display"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
